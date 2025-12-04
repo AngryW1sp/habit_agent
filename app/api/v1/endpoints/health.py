@@ -12,3 +12,4 @@ router = APIRouter(prefix='/health')
 )
 async def get_health() -> HealthResponse:
     return HealthResponse(status='ok', service='habit_service', version='0.1.0')
+

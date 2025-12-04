@@ -1,7 +1,10 @@
 from app.models.habit import Habit
 from sqlalchemy import select
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
+
+from app.schemas.habit import HabitUpdate
 
 
 class CRUDBase:
@@ -23,7 +26,7 @@ class CRUDBase:
         result = await session.execute(select(self.model))
         return result.scalars().all()
 
-    async def get(self, session: AsyncSession, id: int):
+    async def get(self, session: AsyncSession, id: int) -> Habit:
         result = await session.get(self.model, id)
         if not result:
             raise HTTPException(
@@ -31,6 +34,18 @@ class CRUDBase:
                 detail='Не найдено'
             )
         return result
+
+    async def update(self, session: AsyncSession,
+                     obj_in: dict,
+                     db_data: Habit):
+        obj_data = jsonable_encoder(db_data)
+        for field in obj_data:
+            if field in obj_in:
+                setattr(db_data, field, obj_in[field])
+        session.add(db_data)
+        await session.commit()
+        await session.refresh(db_data)
+        return db_data
 
 
 habit_crud = CRUDBase(Habit)
