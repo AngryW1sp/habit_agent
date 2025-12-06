@@ -6,7 +6,6 @@ from pydantic import BaseModel, ConfigDict, Field
 class HabitBase(BaseModel):
     name: str = Field(..., min_length=5, max_length=200)
     description: Optional[str] = None
-    is_active: bool = True
 
 
 class HabitCreate(HabitBase):

@@ -14,7 +14,7 @@ async def habit_completely(obj_in: HabitUpdate, habit_id: int, session: AsyncSes
             status_code=404,
             detail='Не найдено'
         )
-    if update_data['completed_today']:
+    if 'completed_today' in update_data:
         if habit.completed_days_count == 20:
             update_data['completed_days_count'] = 21
             update_data['is_active'] = False
