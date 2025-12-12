@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -15,8 +15,10 @@ class HabitCreate(HabitBase):
 class HabitUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=5, max_length=200)
     description: Optional[str] = None
-    completed_today: Optional[bool] = None
-    is_active: Optional[bool] = None
+
+
+class HabitComplete(BaseModel):
+    date: date
 
 
 class HabitRead(BaseModel):
@@ -25,7 +27,6 @@ class HabitRead(BaseModel):
     description: Optional[str] = None
     completed_days_count: int
     success: bool
-    completed_today: bool
     is_active: bool
     created_at: datetime
     updated_at: datetime
