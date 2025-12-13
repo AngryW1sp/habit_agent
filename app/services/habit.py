@@ -8,14 +8,14 @@ from app.schemas.habit import HabitComplete, HabitCreate, HabitUpdate
 
 
 async def habit_update(obj_in: HabitUpdate, habit_id: int, session: AsyncSession):
-    habit = await habit_crud.get(session, habit_id)
-    update_data = obj_in.model_dump(exclude_unset=True)
-    if not habit:
-        raise HTTPException(
-            status_code=404,
-            detail='Не найдено'
-        )
     async with session.begin():
+        habit = await habit_crud.get(session, habit_id)
+        update_data = obj_in.model_dump(exclude_unset=True)
+        if not habit:
+            raise HTTPException(
+                status_code=404,
+                detail='Не найдено'
+            )
         await habit_crud.update(session, update_data, habit)
     await session.refresh(habit)
     return habit
@@ -27,23 +27,23 @@ async def complete_habit_for_today(
     habit_in: HabitComplete,
 ):
     day = habit_in.date
-    habit = await habit_crud.get(session, habit_id)
-    if not habit:
-        raise HTTPException(404, "Привычка не найдена")
+    async with session.begin():
+        habit = await habit_crud.get(session, habit_id)
+        if not habit:
+            raise HTTPException(404, "Привычка не найдена")
 
-    if not habit.is_active:  # type: ignore
-        raise HTTPException(409, "Привычка не активна")
+        if not habit.is_active:  # type: ignore
+            raise HTTPException(409, "Привычка не активна")
 
-    # Проверяем только для этой привычки
-    habit_check = await habit_checkin_crud.get_complete_habit(
-        session=session,
-        habit_id=habit_id,
-        day=day
-    )
-    if habit_check:
-        raise HTTPException(400, "Привычка уже выполнена!")
+        # Проверяем только для этой привычки
+        habit_check = await habit_checkin_crud.get_complete_habit(
+            session=session,
+            habit_id=habit_id,
+            day=day
+        )
+        if habit_check:
+            raise HTTPException(400, "Привычка уже выполнена!")
 
-    async with session.begin():  # 1. Создаем чек-ин
         habit_check = await habit_checkin_crud.create(session, {
             "habit_id": habit_id,
             "date": day,
@@ -59,11 +59,11 @@ async def complete_habit_for_today(
 
 
 async def remove_habit(session: AsyncSession, habit_id: int):
-    result = await habit_crud.get(session, habit_id)
-    if not result:
-        raise HTTPException(status_code=404,
-                            detail='Привычка не найдена')
     async with session.begin():
+        result = await habit_crud.get(session, habit_id)
+        if not result:
+            raise HTTPException(status_code=404,
+                                detail='Привычка не найдена')
         await habit_crud.remove(session, result)
     return result
 
