@@ -2,7 +2,8 @@ from pydantic import BaseModel
 
 
 class HealthResponse(BaseModel):
-    """Стандартный ответ health-check endpoint."""
+    """Стандартный ответ для проверки состояния сервиса (health-check)."""
+
     status: str
     service: str
     version: str | None = None

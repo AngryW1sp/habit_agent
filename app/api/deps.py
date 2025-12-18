@@ -1,3 +1,5 @@
+"""Dependency-инъекции для FastAPI (Redis и DB сессии)."""
+
 from typing import Annotated
 
 from redis.asyncio import Redis

@@ -1,3 +1,5 @@
+"""Конфигурация Celery — брокер, бекенд и расписание задач."""
+
 from celery import Celery
 from celery.schedules import crontab
 import logging
@@ -9,9 +11,9 @@ logging.basicConfig(
 
 celery_app = Celery(
     "habit_agent",
-    broker='redis://localhost:6379/0',
-    backend='redis://localhost:6379/1',
-    include=["app.core.celery.celery_tasks"]
+    broker="redis://localhost:6379/0",
+    backend="redis://localhost:6379/1",
+    include=["app.core.celery.celery_tasks"],
 )
 
 celery_app.conf.update(

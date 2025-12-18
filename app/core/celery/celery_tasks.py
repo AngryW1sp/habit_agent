@@ -1,3 +1,4 @@
+"""Celery-задачи для фоновой инициализации и обслуживания данных привычек."""
 
 import asyncio
 from datetime import date, timedelta
@@ -12,29 +13,33 @@ logger = logging.getLogger("celery.habit")
 
 @celery_app.task(name="app.core.celery.celery_tasks.daily_init_incomplete", bind=True)
 def daily_init_incomplete(self):
+    """Celery-задача: проверить и инициализировать статус incomplete для вчерашнего дня."""
     started = time.perf_counter()
     try:
         changed = asyncio.run(_daily_init_incomplete_async())
         elapsed = time.perf_counter() - started
         logger.info(
             "finalize_yesterday OK | task_id=%s | changed=%s | elapsed=%.3fs",
-            self.request.id, changed, elapsed
+            self.request.id,
+            changed,
+            elapsed,
         )
         return changed
     except Exception:
         elapsed = time.perf_counter() - started
         logger.exception(
             "finalize_yesterday FAIL | task_id=%s | elapsed=%.3fs",
-            self.request.id, elapsed
+            self.request.id,
+            elapsed,
         )
         raise
 
 
 async def _daily_init_incomplete_async():
+    """Асинхронная реализация логики ежедневной инициализации (выполняется внутри задачи)."""
     day = date.today() - timedelta(days=1)
     async with session_scope() as session:
         async with session.begin():
             changed = await habit_crud.yesterday_not_complete(session)
-    logger.info("finalize_yesterday | day=%s | changed=%s",
-                day.isoformat(), changed)
+    logger.info("finalize_yesterday | day=%s | changed=%s", day.isoformat(), changed)
     return changed

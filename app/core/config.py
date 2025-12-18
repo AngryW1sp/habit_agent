@@ -1,7 +1,11 @@
+"""Конфигурация приложения: настройки окружения и генерация URL для БД и Redis."""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Настройки приложения (загружаются из окружения или .env файла)."""
+
     ENV: str = "local"
 
     # SQLite (local)
@@ -22,6 +26,7 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
+        """URL подключения к базе данных, формируется на основе настроек окружения."""
         if self.ENV == "local":
             return f"sqlite+aiosqlite:///{self.SQLITE_PATH}"
         return (
@@ -31,6 +36,7 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
+        """URL подключения к Redis на основе настроек."""
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
 
 
